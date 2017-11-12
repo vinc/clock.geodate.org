@@ -1,14 +1,15 @@
 {
   "devDependencies": {
+    "http-server": "^0.10.0",
     "wargo-loader": "^0.3.0",
     "webpack": "^3.7.1"
   },
   "scripts": {
     "build": "webpack --progress",
-    "start": "./node_modules/http-server/bin/http-server"
+    "start": "http-server",
+    "preinstall": "npm install -g http-server"
   },
   "dependencies": {
-    "http-server": "^0.10.0",
     "normalize.css": "^7.0.0"
   }
 }
