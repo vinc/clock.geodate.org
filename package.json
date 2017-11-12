@@ -10,6 +10,7 @@
     "start": "http-server"
   },
   "dependencies": {
-    "normalize.css": "^7.0.0"
+    "normalize.css": "^7.0.0",
+    "typeface-inconsolata": "0.0.43"
   }
 }
