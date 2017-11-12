@@ -5,7 +5,7 @@
   },
   "scripts": {
     "build": "webpack --progress",
-    "start": "http-server"
+    "start": "./node_modules/http-server/bin/http-server"
   },
   "dependencies": {
     "http-server": "^0.10.0",
