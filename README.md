@@ -1,7 +1,7 @@
 # Geodate for WebAssembly
 
 This project builds [geodate](https://github.com/vinc/geodate) written in
-rust to wasm and displays it on a webpage.
+rust to wasm and displays it on a [webpage](https://geodate.vinc.cc).
 
 
 ## Usage
