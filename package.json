@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "http-server": "^0.10.0",
+    "wargo-loader": "^0.3.0",
+    "webpack": "^3.7.1"
+  },
+  "scripts": {
+    "compile": "webpack --progress",
+    "serve": "http-server"
+  },
+  "dependencies": {
+    "normalize.css": "^7.0.0"
+  }
+}
