@@ -1,6 +1,6 @@
 # Geodate for WebAssembly
 
-This project compiles [geodate](https://github.com/vinc/geodate) written in
+This project builds [geodate](https://github.com/vinc/geodate) written in
 rust to wasm and displays it on a webpage.
 
 
@@ -9,8 +9,8 @@ rust to wasm and displays it on a webpage.
 Run:
 
     $ yarn install
-    $ yarn run compile
-    $ yarn run serve
+    $ yarn run build
+    $ yarn run start
 
 Then visit: <http://localhost:8080>
 
