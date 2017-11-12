@@ -1,18 +1,28 @@
+html {
+  width: 100%;
+  height: 100%;
+}
 body {
-  overflow: hidden;
-  position: absolute;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  color: #AAA;
+  font-family: "Inconsolata", monospace;
 }
 
 #geodate {
-  color: #555;
-  font-size: 8vw;
-  font-family: "Inconsolata", monospace;
+  font-size: calc(24px + 4vw);
 }
 #geodate span {
-  color: #AAA;  
+  color: #555;
+}
+
+#position {
+  font-size: calc(16px + 2vw);
+  position: absolute;
+  align-self: end;
+  margin-bottom: 0.5em;
 }

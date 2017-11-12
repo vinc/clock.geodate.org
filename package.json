@@ -5,9 +5,9 @@
     "webpack": "^3.7.1"
   },
   "scripts": {
+    "preinstall": "npm install -g http-server",
     "build": "webpack --progress",
-    "start": "http-server",
-    "preinstall": "npm install -g http-server"
+    "start": "http-server"
   },
   "dependencies": {
     "normalize.css": "^7.0.0"
