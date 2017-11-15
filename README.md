@@ -9,8 +9,8 @@ rust to wasm and displays it on a [webpage](https://geodate.vinc.cc).
 Run:
 
     $ yarn install
-    $ yarn run build
-    $ yarn run start
+    $ yarn build
+    $ yarn start
 
 Then visit: <http://localhost:8080>
 

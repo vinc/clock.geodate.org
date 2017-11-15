@@ -25,16 +25,16 @@ body {
   font-family: "Inconsolata", monospace;
 }
 
-#geodate {
+#time {
   font-size: calc(24px + 4vw);
 }
-#geodate span {
+#time span {
   color: #555;
 }
 
 #position {
   font-size: calc(16px + 2vw);
   position: absolute;
-  align-self: end;
-  margin-bottom: 0.5em;
+  align-self: start;
+  margin-top: 0.5em;
 }
