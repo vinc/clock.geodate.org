@@ -5,4 +5,4 @@ version = "0.0.1"
 authors = ["Vincent Ollivier <v@vinc.cc>"]
 
 [dependencies]
-geodate = "0.2.1"
+geodate = { git = "https://github.com/vinc/geodate" }
