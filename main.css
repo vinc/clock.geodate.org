@@ -20,7 +20,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
 
+body, code {
   color: #AAA;
   font-family: "Inconsolata", monospace;
 }
@@ -28,8 +30,10 @@ body {
 #time {
   font-size: calc(24px + 4vw);
 }
-#time span {
+#time code {
   color: #555;
+}
+#time code:hover {
 }
 
 #position {
@@ -39,7 +43,47 @@ body {
   margin-top: 0.5em;
 }
 @media (max-width: 575px) {
-  .sm-hide {
+  .extra {
     display: none;
   }
+}
+
+#time {
+  position: relative;
+}
+code:hover:after {
+  font-size: calc(16px + 2vw);
+  color: #AAA;
+  position: absolute;
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+#latitude:hover:after {
+  content: "(latitude)";
+}
+#longitude:hover:after {
+  content: "(longitude)";
+}
+#century:hover:after {
+  content: "(centuries since epoch)";
+}
+#year:hover:after {
+  content: "(years)";
+}
+#month:hover:after {
+  content: "(months since second solstice)";
+}
+#day:hover:after {
+  content: "(days since new moon)";
+}
+#centiday:hover:after {
+  content: "(centidays since midnight)";
+}
+#dimiday:hover:after {
+  content: "(dimidays)";
+}
+#microday:hover:after {
+  content: "(microdays)";
 }
