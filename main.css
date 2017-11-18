@@ -23,7 +23,10 @@ body {
   background: linear-gradient(#001, #002 66%, #112);
 }
 #sky,
+#sunrise,
+#sunset,
 #sun {
+  transition: 2s;
   position: absolute;
   top: 0;
   left: 0;
@@ -32,11 +35,18 @@ body {
 }
 #sky {
   background: linear-gradient(#125, #136 15%, #19C);
-  transition: opacity 2s;
   opacity: 1.0;
 }
+#sunrise {
+  background: radial-gradient(circle at left bottom, #F63, transparent 200%);
+  opacity: 0.0;
+}
+#sunset {
+  background: radial-gradient(circle at right bottom, #F63, transparent 200%);
+  opacity: 0.0;
+}
 #sun {
-  background: radial-gradient(circle at 105% 0%, #FFF, #FFC 10%, transparent);
+  background: radial-gradient(circle at 105% 0%, #FFF, #FFC 10%, transparent 80%);
   opacity: 0.0;
 }
 
