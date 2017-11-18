@@ -6,7 +6,6 @@ use geodate::geodate::get_date;
 
 fn main() { // FIXME: remove main()
     println!("geodate loaded");
-    println!("test {}", get_date(0, 0.0));
 }
 
 #[no_mangle]

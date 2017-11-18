@@ -7,11 +7,12 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   var longitude;
   var latitude;
 
-  var sync = function() {
+  var sync = function(callback) {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(function(position) {
         longitude = position.coords.longitude;
         latitude = position.coords.latitude;
+        callback();
      });
     }
   };
@@ -39,8 +40,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   };
 
   // Update display
-  sync();
-  render();
+  sync(render);
   window.setInterval(render, 86.4);
   window.setInterval(sync, 100000);
 
