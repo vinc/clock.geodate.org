@@ -14,16 +14,35 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   var latitude;
   var sunrise;
   var sunset;
+  var background;
+  var clock;
 
   var sync = function(callback) {
+    background = localStorage.getItem("background") || "animated";
+
+    clock = localStorage.getItem("clock") || "full";
+    switch (clock) {
+    case "full":
+      document.documentElement.classList.add("clock-full");
+      document.documentElement.classList.remove("clock-compact");
+      break;
+    case "compact":
+      document.documentElement.classList.add("clock-compact");
+      document.documentElement.classList.remove("clock-full");
+      break;
+    }
+
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(function(position) {
         longitude = position.coords.longitude;
         latitude = position.coords.latitude;
 
-        var timestamp = new Date() / 1000;
-        sunrise = getSunrise(timestamp, longitude, latitude);
-        sunset = getSunset(timestamp, longitude, latitude);
+        if (background === "animated") {
+          var timestamp = new Date() / 1000;
+          sunrise = getSunrise(timestamp, longitude, latitude);
+          sunset = getSunset(timestamp, longitude, latitude);
+        }
 
         if (callback) {
           callback();
@@ -33,83 +52,85 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   };
 
   var renderSky = function() {
-    var timestamp = new Date() / 1000;
-    var sun = "transparent";
-    var zenith = -300; // percent of the screen
-    var horizon = 100; // percent of the screen
-    var nadir = 300; // percent of the screen
-    var brightness = 0.0; // opacity
-    var noon = sunrise + ((sunset - sunrise) / 2);
-    var halfday = 86400 / 2;
-    var twilight = 3000; // duration in seconds
-    var daylight = 1.0; // opacity
-    var redish = 0.0;
-    if (timestamp > sunset + twilight) { // night
-      daylight = 0.0;
-      brightness = 0.0;
-      redish = 0.0;
-      sun = "transparent";
-    } else if (timestamp > sunset - twilight) { // dusk
-      daylight = interpolate(timestamp, sunset + twilight, sunset - twilight, 0.0, 1.0);
-      if (timestamp > sunset) {
-        alt = interpolate(timestamp, sunset, noon + halfday, horizon, nadir);
-        brightness = interpolate(timestamp, sunset, sunset + twilight, 1.0, 0.0);
-        redish = interpolate(timestamp, sunset, sunset + twilight, 1.0, 0.0);
-      } else {
-        alt = interpolate(timestamp, noon, sunset, zenith, horizon);
+    if (background === "animated" && sunrise && sunset) {
+      var timestamp = new Date() / 1000;
+      var sun = "transparent";
+      var zenith = -300; // percent of the screen
+      var horizon = 100; // percent of the screen
+      var nadir = 300; // percent of the screen
+      var brightness = 0.0; // opacity
+      var noon = sunrise + ((sunset - sunrise) / 2);
+      var halfday = 86400 / 2;
+      var twilight = 3000; // duration in seconds
+      var daylight = 1.0; // opacity
+      var redish = 0.0;
+      if (timestamp > sunset + twilight) { // night
+        daylight = 0.0;
+        brightness = 0.0;
+        redish = 0.0;
+        sun = "transparent";
+      } else if (timestamp > sunset - twilight) { // dusk
+        daylight = interpolate(timestamp, sunset + twilight, sunset - twilight, 0.0, 1.0);
+        if (timestamp > sunset) {
+          alt = interpolate(timestamp, sunset, noon + halfday, horizon, nadir);
+          brightness = interpolate(timestamp, sunset, sunset + twilight, 1.0, 0.0);
+          redish = interpolate(timestamp, sunset, sunset + twilight, 1.0, 0.0);
+        } else {
+          alt = interpolate(timestamp, noon, sunset, zenith, horizon);
+          brightness = 1.0;
+          redish = interpolate(timestamp, sunset - twilight, sunset, 0.0, 1.0);
+        }
+        sun = "radial-gradient(circle at 105% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
+      } else if (timestamp > sunrise + twilight) { // day
+        daylight = 1.0;
         brightness = 1.0;
-        redish = interpolate(timestamp, sunset - twilight, sunset, 0.0, 1.0);
+        redish = 0.0;
+        var loc;
+        if (timestamp > noon) {
+          loc = 105;
+          alt = interpolate(timestamp, noon, sunset, zenith, horizon);
+        } else {
+          loc = -5;
+          alt = interpolate(timestamp, sunrise, noon, horizon, zenith);
+        }
+        // Around noon the sun move from the left to the right of the screen
+        var delta = (sunset - sunrise) / 4;
+        if (noon - delta < timestamp && timestamp < noon + delta) {
+          loc = interpolate(timestamp, noon - delta, noon + delta, -5, 105);
+        }
+        sun = "radial-gradient(circle at " + loc + "% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
+      } else if (timestamp > sunrise - twilight) { // dawn
+        daylight = interpolate(timestamp, sunrise + twilight, sunrise - twilight, 1.0, 0.0);
+        if (timestamp > sunrise) {
+          alt = interpolate(timestamp, sunrise, noon, horizon, zenith);
+          brightness = 1.0;
+          redish = interpolate(timestamp, sunrise, sunrise + twilight, 1.0, 0.0);
+        } else {
+          alt = interpolate(timestamp, noon - halfday, sunrise, nadir, horizon);
+          brightness = interpolate(timestamp, sunrise - twilight, sunrise, 0.0, 1.0);
+          redish = interpolate(timestamp, sunrise - twilight, sunrise, 0.0, 1.0);
+        }
+        sun = "radial-gradient(circle at -5% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
+      } else { // night
+        daylight = 0.0;
+        brightness = 0.0;
+        redish = 0.0;
+        sun = "transparent";
       }
-      sun = "radial-gradient(circle at 105% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
-    } else if (timestamp > sunrise + twilight) { // day
-      daylight = 1.0;
-      brightness = 1.0;
-      redish = 0.0;
-      var loc;
+      //console.log("timestamp: " + timestamp);
+      //console.log("sunrise: " + sunrise);
+      //console.log("noon: " + noon);
+      //console.log("sunset: " + sunset);
+      document.getElementById("sun").style.background = sun;
+      document.getElementById("sun").style.opacity = brightness;
+      document.getElementById("sky").style.opacity = daylight;
       if (timestamp > noon) {
-        loc = 105;
-        alt = interpolate(timestamp, noon, sunset, zenith, horizon);
+        document.getElementById("sunrise").style.opacity = 0.0;
+        document.getElementById("sunset").style.opacity = redish;
       } else {
-        loc = -5;
-        alt = interpolate(timestamp, sunrise, noon, horizon, zenith);
+        document.getElementById("sunrise").style.opacity = redish;
+        document.getElementById("sunset").style.opacity = 0.0;
       }
-      // Around noon the sun move from the left to the right of the screen
-      var delta = (sunset - sunrise) / 4;
-      if (noon - delta < timestamp && timestamp < noon + delta) {
-        loc = interpolate(timestamp, noon - delta, noon + delta, -5, 105);
-      }
-      sun = "radial-gradient(circle at " + loc + "% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
-    } else if (timestamp > sunrise - twilight) { // dawn
-      daylight = interpolate(timestamp, sunrise + twilight, sunrise - twilight, 1.0, 0.0);
-      if (timestamp > sunrise) {
-        alt = interpolate(timestamp, sunrise, noon, horizon, zenith);
-        brightness = 1.0;
-        redish = interpolate(timestamp, sunrise, sunrise + twilight, 1.0, 0.0);
-      } else {
-        alt = interpolate(timestamp, noon - halfday, sunrise, nadir, horizon);
-        brightness = interpolate(timestamp, sunrise - twilight, sunrise, 0.0, 1.0);
-        redish = interpolate(timestamp, sunrise - twilight, sunrise, 0.0, 1.0);
-      }
-      sun = "radial-gradient(circle at -5% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
-    } else { // night
-      daylight = 0.0;
-      brightness = 0.0;
-      redish = 0.0;
-      sun = "transparent";
-    }
-    //console.log("timestamp: " + timestamp);
-    //console.log("sunrise: " + sunrise);
-    //console.log("noon: " + noon);
-    //console.log("sunset: " + sunset);
-    document.getElementById("sun").style.background = sun;
-    document.getElementById("sun").style.opacity = brightness;
-    document.getElementById("sky").style.opacity = daylight;
-    if (timestamp > noon) {
-      document.getElementById("sunrise").style.opacity = 0.0;
-      document.getElementById("sunset").style.opacity = redish;
-    } else {
-      document.getElementById("sunrise").style.opacity = redish;
-      document.getElementById("sunset").style.opacity = 0.0;
     }
   };
 

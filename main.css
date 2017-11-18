@@ -38,11 +38,11 @@ body {
   opacity: 1.0;
 }
 #sunrise {
-  background: radial-gradient(circle at left bottom, #F63, transparent 200%);
+  background: radial-gradient(circle at left bottom, #F62, transparent 200%);
   opacity: 0.0;
 }
 #sunset {
-  background: radial-gradient(circle at right bottom, #F63, transparent 200%);
+  background: radial-gradient(circle at right bottom, #F62, transparent 200%);
   opacity: 0.0;
 }
 #sun {
@@ -75,9 +75,15 @@ body, code {
     display: none;
   }
 }
+html.clock-compact .extra {
+  display: none;
+}
 
 #time {
   position: relative;
+  text-align: center;
+  width: 100%;
+  margin: 1em;
 }
 code:hover:after {
   font-size: calc(16px + 2vw);
