@@ -3,6 +3,7 @@ extern crate geodate;
 use std::os::raw::c_char;
 use std::ffi::CString;
 use geodate::geodate::get_date;
+use geodate::sun_transit;
 
 fn main() { // FIXME: remove main()
     println!("geodate loaded");
@@ -13,6 +14,24 @@ pub fn geodate(timestamp: i32, longitude: f32) -> *mut c_char {
     let date = get_date(timestamp as i64, longitude as f64);
 
     CString::new(date).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub fn sunrise(timestamp: i32, longitude: f32, latitude: f32) -> i32 {
+    if let Some(sunrise) = sun_transit::get_sunrise(timestamp as i64, longitude as f64, latitude as f64) {
+        sunrise as i32
+    } else {
+        -1
+    }
+}
+
+#[no_mangle]
+pub fn sunset(timestamp: i32, longitude: f32, latitude: f32) -> i32 {
+    if let Some(sunset) = sun_transit::get_sunset(timestamp as i64, longitude as f64, latitude as f64) {
+        sunset as i32
+    } else {
+        -1
+    }
 }
 
 #[cfg(test)]

@@ -20,10 +20,28 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: linear-gradient(#001, #002 66%, #112);
+}
+#sky,
+#sun {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#sky {
+  background: linear-gradient(#125, #136 15%, #19C);
+  transition: opacity 2s;
+  opacity: 1.0;
+}
+#sun {
+  background: radial-gradient(circle at 105% 0%, #FFF, #FFC 10%, transparent);
+  opacity: 0.0;
 }
 
 body, code {
-  color: #AAA;
+  color: rgba(255, 255, 255, 0.5);
   font-family: "Inconsolata", monospace;
 }
 
@@ -31,7 +49,7 @@ body, code {
   font-size: calc(24px + 4vw);
 }
 #time code {
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
 }
 #time code:hover {
 }
@@ -53,7 +71,7 @@ body, code {
 }
 code:hover:after {
   font-size: calc(16px + 2vw);
-  color: #AAA;
+  color: rgba(255, 255, 255, 0.5);
   position: absolute;
   display: block;
   text-align: center;
