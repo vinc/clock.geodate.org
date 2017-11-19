@@ -12967,9 +12967,11 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     }
   });
 
+  document.getElementById("alert").innerHTML = "Accessing geolocation ...";
   var sync = function(callback) {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(function(position) {
+        document.getElementById("alert").innerHTML = "";
         longitude = position.coords.longitude;
         latitude = position.coords.latitude;
 
@@ -12988,7 +12990,11 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
         if (callback) {
           callback();
         }
+     }, function() {
+       document.getElementById("alert").innerHTML = "Geolocation is required to compute geodate";
      });
+    } else {
+      document.getElementById("alert").innerHTML = "Geolocation is required to compute geodate";
     }
   };
 
