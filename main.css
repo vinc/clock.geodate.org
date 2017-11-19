@@ -51,7 +51,7 @@ body {
 }
 
 body, code {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   font-family: "Inconsolata", monospace;
 }
