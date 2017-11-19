@@ -100,21 +100,22 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
           redish = interpolate(timestamp, sunset, sunset + twilight, 1.0, 0.0);
         } else {
           alt = interpolate(timestamp, noon, sunset, zenith, horizon);
-          brightness = 1.0;
+          brightness = interpolate(timestamp, noon, sunset, 0.0, 1.0);
           redish = interpolate(timestamp, sunset - twilight, sunset, 0.0, 1.0);
         }
         sun = "radial-gradient(circle at 105% " + alt + "%, #FFF, #FFC 10%, transparent 80%)";
       } else if (timestamp > sunrise + twilight) { // day
         daylight = 1.0;
-        brightness = 1.0;
         redish = 0.0;
         var loc;
         if (timestamp > noon) {
           loc = 105;
           alt = interpolate(timestamp, noon, sunset, zenith, horizon);
+          brightness = interpolate(timestamp, noon, sunset, 0.0, 1.0);
         } else {
           loc = -5;
           alt = interpolate(timestamp, sunrise, noon, horizon, zenith);
+          brightness = interpolate(timestamp, sunrise, noon, 1.0, 0.0);
         }
         // Around noon the sun move from the left to the right of the screen
         var delta = (sunset - sunrise) / 4;
@@ -126,7 +127,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
         daylight = interpolate(timestamp, sunrise + twilight, sunrise - twilight, 1.0, 0.0);
         if (timestamp > sunrise) {
           alt = interpolate(timestamp, sunrise, noon, horizon, zenith);
-          brightness = 1.0;
+          brightness = interpolate(timestamp, sunrise, noon, 1.0, 0.0);
           redish = interpolate(timestamp, sunrise, sunrise + twilight, 1.0, 0.0);
         } else {
           alt = interpolate(timestamp, noon - halfday, sunrise, nadir, horizon);
