@@ -50,9 +50,11 @@ body {
   opacity: 0.0;
 }
 
-body, code {
+body {
   color: rgba(255, 255, 255, 0.6);
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+body, code {
   font-family: "Inconsolata", monospace;
 }
 
@@ -61,8 +63,6 @@ body, code {
 }
 #time code {
   color: rgba(255, 255, 255, 0.9);
-}
-#time code:hover {
 }
 
 #position {
@@ -75,6 +75,9 @@ body, code {
   .extra {
     display: none;
   }
+  html.menu #time {
+    opacity: 0;
+  }
 }
 html.clock-compact .extra {
   display: none;
@@ -86,20 +89,13 @@ html.clock-compact .extra {
   width: 100%;
   margin: 1em;
 }
-code:hover:after {
+#time code:hover:after {
   font-size: calc(16px + 2vw);
   color: rgba(255, 255, 255, 0.5);
   position: absolute;
   display: block;
   text-align: center;
   width: 100%;
-}
-
-#latitude:hover:after {
-  content: "(latitude)";
-}
-#longitude:hover:after {
-  content: "(longitude)";
 }
 #century:hover:after {
   content: "(centuries since epoch)";
@@ -121,4 +117,97 @@ code:hover:after {
 }
 #microday:hover:after {
   content: "(microdays)";
+}
+
+html.menu #menu-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.hamburger-inner:before,
+.hamburger-inner:after,
+.hamburger-outer,
+.hamburger-inner {
+  display: block;
+  width: 20px;
+  transition: 0.1s;
+}
+.hamburger-outer {
+  position: relative;
+  height: calc(2px + 2 * 6px);
+}
+.hamburger-inner:before,
+.hamburger-inner:after,
+.hamburger-inner {
+  position: absolute;
+  content: "";
+  height: 2px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.hamburger-outer:hover .hamburger-inner:before,
+.hamburger-outer:hover .hamburger-inner:after,
+.hamburger-outer:hover .hamburger-inner {
+  background: rgba(255, 255, 255, 0.9);
+}
+.hamburger-inner:before {
+  top: -6px;
+}
+.hamburger-inner,
+.hamburger-inner:after {
+  top: 6px;
+}
+html.menu .hamburger-inner,
+html.menu .hamburger-outer:hover .hamburger-inner {
+  background: transparent;
+}
+html.menu .hamburger-inner:before {
+  transform: rotate(45deg);
+  top: 0;
+}
+html.menu .hamburger-inner:after {
+  transform: rotate(-45deg);
+  top: 0;
+}
+
+#menu-button,
+#menu-content {
+  position: absolute;
+  font-size: calc(18px + 1vw);
+  right: 0;
+  top: 0;
+}
+#menu-button {
+  padding: 0.5em;
+  transition: color ease 0.5s;
+  z-index: 2;
+}
+#menu-content {
+  display: none;
+  height: 100%;
+  padding: 0 0.5em;
+  background: rgba(0, 0, 0, 0.2);
+}
+#menu-content > div {
+  margin-top: 1em;
+}
+#menu-content > #geolocation {
+  margin-top: 1.5em;
+}
+#menu-content > #credits {
+  margin-top: auto;
+  margin-bottom: 0.5em;
+}
+#menu-content code {
+  float: right;
+  margin-left: 1em;
+}
+#credits a {
+  color: inherit;
+}
+.btn {
+  cursor: pointer;
+}
+#credits a:hover,
+.btn:hover {
+  color: rgba(255, 255, 255, 0.9);
 }

@@ -14,11 +14,37 @@
     <div id="sunrise"></div>
     <div id="sunset"></div>
     <div id="sun"></div>
+
     <div id="position">
-      (<code id="latitude">LAT</code> <code id="longitude">LON</code>)
+      <!--(<code id="latitude">LAT</code> <code id="longitude">LON</code>)-->
     </div>
+
     <div id="time">
       <span class="extra"><code id="century">HH</code>:</span><code id="year">YY</code>:<code id="month">MM</code>:<code id="day">DD</code>:<code id="centiday">CC</code>:<code id="dimiday">BB</code><span class="extra">:<code id="microday">UU</code></span>
     </div>
+
+    <aside id="menu">
+      <div id="menu-button" class="btn" aria-label="menu">
+        <span class="hamburger-outer">
+          <span class="hamburger-inner"></span>
+        </span>
+      </div>
+      <div id="menu-content">
+        <div id="geolocation">
+          <div>latitude: <code id="latitude">LAT</code></div>
+          <div>longitude: <code id="longitude">LON</code></div>
+        </div>
+        <div id="ephemeris">
+          <div>sunrise: <code id="sunrise-time">CC:BB</code></div>
+          <div>sunset: <code id="sunset-time">CC:BB</code></div>
+        </div>
+        <div id="settings">
+          <div>clock: <code id="settings-clock" class="btn">full</code></div>
+        </div>
+        <div id="credits">
+          <div>format: <code><a href="https://geodate.org">Geodate</a></code></div>
+        </div>
+      </div>
+    </aside>
   </body>
 </html>

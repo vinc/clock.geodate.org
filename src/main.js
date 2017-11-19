@@ -14,13 +14,13 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   var latitude;
   var sunrise;
   var sunset;
-  var background;
-  var clock;
 
-  var sync = function(callback) {
-    background = localStorage.getItem("background") || "animated";
+  var background = localStorage.getItem("background") || "animated";
+  var clock = localStorage.getItem("clock") || "full";
 
-    clock = localStorage.getItem("clock") || "full";
+  var updateClockSetting = function() {
+    localStorage.setItem("clock", clock);
+    document.getElementById("settings-clock").innerHTML = clock;
     switch (clock) {
     case "full":
       document.documentElement.classList.add("clock-full");
@@ -31,8 +31,19 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
       document.documentElement.classList.remove("clock-full");
       break;
     }
+  };
 
+  var menu = false;
+  document.getElementById("menu-button").addEventListener("click", function() {
+    menu = !menu;
+    if (menu) {
+      document.documentElement.classList.add("menu");
+    } else {
+      document.documentElement.classList.remove("menu");
+    }
+  });
 
+  var sync = function(callback) {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(function(position) {
         longitude = position.coords.longitude;
@@ -42,6 +53,12 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
           var timestamp = new Date() / 1000;
           sunrise = getSunrise(timestamp, longitude, latitude);
           sunset = getSunset(timestamp, longitude, latitude);
+
+          var sunriseTime = geodate(sunrise, longitude);
+          document.getElementById("sunrise-time").innerHTML = sunriseTime.slice(12, 17);
+
+          var sunsetTime = geodate(sunset, longitude);
+          document.getElementById("sunset-time").innerHTML = sunsetTime.slice(12, 17);
         }
 
         if (callback) {
@@ -160,6 +177,11 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   };
 
   // Update display
+  updateClockSetting();
+  document.getElementById("settings-clock").addEventListener("click", function() {
+    clock = clock === "full" ? "compact" : "full";
+    updateClockSetting();
+  });
   sync(function() {
     renderSky();
     renderClock();
