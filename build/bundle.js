@@ -12941,6 +12941,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
 
   var background = localStorage.getItem("background") || "animated";
   var clock = localStorage.getItem("clock") || "full";
+  var format = localStorage.getItem("format") || "human";
 
   var updateClockSetting = function() {
     localStorage.setItem("clock", clock);
@@ -12957,6 +12958,22 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     }
   };
 
+  var updateFormatSetting = function() {
+    localStorage.setItem("format", format);
+    document.getElementById("settings-format").innerHTML = format;
+    switch (format) {
+    case "human":
+      document.documentElement.classList.add("format-human");
+      document.documentElement.classList.remove("format-machine");
+      break;
+    case "machine":
+      document.documentElement.classList.add("format-machine");
+      document.documentElement.classList.remove("format-human");
+      break;
+    }
+    sync();
+  };
+
   var menu = false;
   document.getElementById("menu-button").addEventListener("click", function() {
     menu = !menu;
@@ -12967,7 +12984,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     }
   });
 
-  document.getElementById("alert").innerHTML = "Accessing geolocation ...";
+  document.getElementById("alert").innerHTML = "accessing geolocation";
   var sync = function(callback) {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -12975,26 +12992,36 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
         longitude = position.coords.longitude;
         latitude = position.coords.latitude;
 
+        document.getElementById("longitude").innerHTML = longitude.toFixed(4);
+        document.getElementById("latitude").innerHTML  = latitude.toFixed(4);
+
         if (background === "animated") {
           var timestamp = new Date() / 1000;
           sunrise = getSunrise(timestamp, longitude, latitude);
           sunset = getSunset(timestamp, longitude, latitude);
 
-          var sunriseTime = geodate(sunrise, longitude);
-          document.getElementById("sunrise-time").innerHTML = sunriseTime.slice(12, 17);
-
-          var sunsetTime = geodate(sunset, longitude);
-          document.getElementById("sunset-time").innerHTML = sunsetTime.slice(12, 17);
+          switch (format) {
+          case "human":
+            var sunriseTime = geodate(sunrise, longitude);
+            var sunsetTime = geodate(sunset, longitude);
+            document.getElementById("sunrise-time").innerHTML = sunriseTime.slice(12, 17);
+            document.getElementById("sunset-time").innerHTML = sunsetTime.slice(12, 17);
+            break;
+          case "machine":
+            document.getElementById("sunrise-time").innerHTML = sunrise;
+            document.getElementById("sunset-time").innerHTML = sunset;
+            break;
+          }
         }
 
         if (callback) {
           callback();
         }
      }, function() {
-       document.getElementById("alert").innerHTML = "Geolocation is required to compute geodate";
+       document.getElementById("alert").innerHTML = "geolocation is required to compute geodate";
      });
     } else {
-      document.getElementById("alert").innerHTML = "Geolocation is required to compute geodate";
+      document.getElementById("alert").innerHTML = "geolocation is required to compute geodate";
     }
   };
 
@@ -13097,13 +13124,17 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
           document.getElementById("day").innerHTML       = parts[3];
           document.getElementById("centiday").innerHTML  = parts[4];
           document.getElementById("dimiday").innerHTML   = parts[5];
-          document.getElementById("longitude").innerHTML = longitude.toFixed(4);
-          document.getElementById("latitude").innerHTML  = latitude.toFixed(4);
         }, 0);
       }
 
-      microday++;
-      document.getElementById("microday").innerHTML = ("00" + (microday % 100)).slice(-2);
+      if (format === "machine") {
+        var timestamp = new Date() / 1000;
+        document.getElementById("timestamp").innerHTML = timestamp.toFixed(0);
+        microday = 0;
+      } else {
+        document.getElementById("microday").innerHTML = ("00" + (microday % 100)).slice(-2);
+        microday++;
+      }
     }
   };
 
@@ -13112,6 +13143,11 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   document.getElementById("settings-clock").addEventListener("click", function() {
     clock = clock === "full" ? "compact" : "full";
     updateClockSetting();
+  });
+  updateFormatSetting();
+  document.getElementById("settings-format").addEventListener("click", function() {
+    format = format === "human" ? "machine" : "human";
+    updateFormatSetting();
   });
   sync(function() {
     renderSky();

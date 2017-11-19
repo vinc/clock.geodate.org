@@ -16,7 +16,12 @@
     <div id="sun"></div>
 
     <div id="time">
-      <span class="extra"><code id="century">HH</code>:</span><code id="year">YY</code>:<code id="month">MM</code>:<code id="day">DD</code>:<code id="centiday">CC</code>:<code id="dimiday">BB</code><span class="extra">:<code id="microday">UU</code></span>
+      <span id="human">
+        <span class="extra"><code id="century">HH</code>:</span><code id="year">YY</code>:<code id="month">MM</code>:<code id="day">DD</code>:<code id="centiday">CC</code>:<code id="dimiday">BB</code><span class="extra">:<code id="microday">UU</code></span>
+      </span>
+      <span id="machine">
+        <code id="timestamp"></code>
+      </span>
     </div>
 
     <aside id="menu">
@@ -36,9 +41,10 @@
         </div>
         <div id="settings">
           <div>clock: <code id="settings-clock" class="btn">full</code></div>
+          <div>format: <code id="settings-format" class="btn">human</code></div>
         </div>
         <div id="credits">
-          <div>format: <code><a href="https://geodate.org">Geodate</a></code></div>
+          <div>visit: <code><a href="https://geodate.org">Geodate</a></code></div>
         </div>
       </div>
     </aside>
