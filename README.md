@@ -1,7 +1,9 @@
 # Geodate for WebAssembly
 
+[![Geodate Clock](https://i.imgur.com/RvTeIT5.png)](https://clock.geodate.org)
+
 This project builds [geodate](https://github.com/vinc/geodate) written in
-rust to wasm and displays it on a [webpage](https://geodate.vinc.cc).
+rust to wasm and displays it on a [webpage](https://clock.geodate.org).
 
 
 ## Usage
