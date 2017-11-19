@@ -34,7 +34,7 @@ body {
   height: 100%;
 }
 #sky {
-  background: linear-gradient(#125, #136 15%, #19C);
+  background: linear-gradient(#125, #136 15%, #19C 70%, #9CF);
   opacity: 1.0;
 }
 #sunrise {
