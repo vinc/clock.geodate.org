@@ -214,11 +214,13 @@ a {
 
 #time #human,
 #time #machine,
+#time #legacy,
 html.format-human #time #machine,
 html.format-machine #time #human {
   display: none;
 }
 html.format-human #time #human,
-html.format-machine #time #machine {
+html.format-machine #time #machine,
+html.format-legacy #time #legacy {
   display: block;
 }

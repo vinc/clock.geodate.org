@@ -12928,6 +12928,23 @@ var interpolate = function(x, x0, x1, y0, y1) {
   return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
 };
 
+var leftpad = function(num, pad) {
+  //return ("0".repeat(pad) + num).slice(-pad);
+  return (Array(pad + 1).join("0") + num).slice(-pad);
+};
+
+var unixToDate = function(timestamp) {
+  var date = new Date(timestamp * 1000);
+
+  return [leftpad(date.getFullYear(), 4), leftpad(date.getMonth(), 2), leftpad(date.getDate(), 2)].join("-");
+};
+
+var unixToTime = function(timestamp) {
+  var date = new Date(timestamp * 1000);
+
+  return [leftpad(date.getHours(), 2), leftpad(date.getMinutes(), 2), leftpad(date.getSeconds(), 2)].join(":");
+};
+
 wasm.initialize({ noExitRuntime: true }).then(function(module) {
   var geodate = module.cwrap("geodate", "string", ["number", "number"]);
   var getSunrise = module.cwrap("sunrise", "number", ["number", "number", "number"]);
@@ -12965,10 +12982,17 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     case "human":
       document.documentElement.classList.add("format-human");
       document.documentElement.classList.remove("format-machine");
+      document.documentElement.classList.remove("format-legacy");
       break;
     case "machine":
       document.documentElement.classList.add("format-machine");
       document.documentElement.classList.remove("format-human");
+      document.documentElement.classList.remove("format-legacy");
+      break;
+    case "legacy":
+      document.documentElement.classList.add("format-legacy");
+      document.documentElement.classList.remove("format-human");
+      document.documentElement.classList.remove("format-machine");
       break;
     }
     sync();
@@ -12996,7 +13020,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
         document.getElementById("latitude").innerHTML  = latitude.toFixed(4);
 
         if (background === "animated") {
-          var timestamp = new Date() / 1000;
+          var timestamp = Date.now() / 1000;
           sunrise = getSunrise(timestamp, longitude, latitude);
           sunset = getSunset(timestamp, longitude, latitude);
 
@@ -13010,6 +13034,10 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
           case "machine":
             document.getElementById("sunrise-time").innerHTML = sunrise;
             document.getElementById("sunset-time").innerHTML = sunset;
+            break;
+          case "legacy":
+            document.getElementById("sunrise-time").innerHTML = unixToTime(sunrise);
+            document.getElementById("sunset-time").innerHTML = unixToTime(sunset);
             break;
           }
         }
@@ -13027,7 +13055,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
 
   var renderSky = function() {
     if (background === "animated" && sunrise && sunset) {
-      var timestamp = new Date() / 1000;
+      var timestamp = Date.now() / 1000;
       var sun = "transparent";
       var zenith = -300; // percent of the screen
       var horizon = 100; // percent of the screen
@@ -13111,10 +13139,11 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
 
   var renderClock = function() {
     if (latitude && longitude) {
+      var timestamp = Date.now() / 1000;
+
       if (microday >= 100) {
         microday = 0;
         setTimeout(function() {
-          var timestamp = new Date() / 1000;
           var parts = geodate(timestamp, longitude).split(":");
 
           // Render clock
@@ -13127,13 +13156,20 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
         }, 0);
       }
 
-      if (format === "machine") {
-        var timestamp = new Date() / 1000;
+      switch (format) {
+      case "human":
+        document.getElementById("microday").innerHTML = leftpad(microday % 100, 2);
+        microday++;
+        break;
+      case "machine":
         document.getElementById("timestamp").innerHTML = timestamp.toFixed(0);
         microday = 0;
-      } else {
-        document.getElementById("microday").innerHTML = ("00" + (microday % 100)).slice(-2);
-        microday++;
+        break;
+      case "legacy":
+        document.getElementById("legacy-date").innerHTML = unixToDate(timestamp);
+        document.getElementById("legacy-time").innerHTML = unixToTime(timestamp);
+        microday = 0;
+        break;
       }
     }
   };
@@ -13141,12 +13177,19 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   // Update display
   updateClockSetting();
   document.getElementById("settings-clock").addEventListener("click", function() {
-    clock = clock === "full" ? "compact" : "full";
+    switch (clock) {
+      case "full":    clock = "compact"; break;
+      case "compact": clock = "full";    break;
+    }
     updateClockSetting();
   });
   updateFormatSetting();
   document.getElementById("settings-format").addEventListener("click", function() {
-    format = format === "human" ? "machine" : "human";
+    switch (format) {
+      case "human":   format = "machine"; break;
+      case "machine": format = "legacy";  break;
+      case "legacy":  format = "human";   break;
+    }
     updateFormatSetting();
   });
   sync(function() {
