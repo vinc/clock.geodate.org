@@ -171,7 +171,7 @@ html.menu .hamburger-inner:after {
 #menu-button,
 #menu-content {
   position: absolute;
-  font-size: calc(18px + 1vw);
+  font-size: 1.5em;
   right: 0;
   top: 0;
 }
