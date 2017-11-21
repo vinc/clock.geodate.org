@@ -11,14 +11,24 @@ var leftpad = function(num, pad) {
 
 var unixToDate = function(timestamp) {
   var date = new Date(timestamp * 1000);
+  var parts = [
+    leftpad(date.getFullYear(), 4),
+    leftpad(date.getMonth() + 1, 2),
+    leftpad(date.getDate(), 2)
+  ];
 
-  return [leftpad(date.getFullYear(), 4), leftpad(date.getMonth(), 2), leftpad(date.getDate(), 2)].join("-");
+  return parts.join("-");
 };
 
 var unixToTime = function(timestamp) {
   var date = new Date(timestamp * 1000);
+  var parts = [
+    leftpad(date.getHours(), 2),
+    leftpad(date.getMinutes(), 2),
+    leftpad(date.getSeconds(), 2)
+  ];
 
-  return [leftpad(date.getHours(), 2), leftpad(date.getMinutes(), 2), leftpad(date.getSeconds(), 2)].join(":");
+  return parts.join(":");
 };
 
 wasm.initialize({ noExitRuntime: true }).then(function(module) {
@@ -33,9 +43,8 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   var sunset;
 
   var background = localStorage.getItem("background") || "animated";
-  var clock = localStorage.getItem("clock") || "full";
-  var format = localStorage.getItem("format") || "human";
 
+  var clock = localStorage.getItem("clock") || "full";
   var updateClockSetting = function() {
     localStorage.setItem("clock", clock);
     document.getElementById("settings-clock").innerHTML = clock;
@@ -51,7 +60,27 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     }
   };
 
+  var epoch = localStorage.getItem("epoch") || "gregorian";
+  var updateEpochSetting = function() {
+    localStorage.setItem("epoch", epoch);
+    document.getElementById("settings-epoch").innerHTML = epoch;
+    switch (epoch) {
+    case "gregorian":
+      document.documentElement.classList.add("epoch-gregorian");
+      document.documentElement.classList.remove("epoch-unix");
+      break;
+    case "unix":
+      document.documentElement.classList.add("epoch-unix");
+      document.documentElement.classList.remove("epoch-gregorian");
+      break;
+    }
+    renderGeodate(Date.now() / 1000);
+  };
+
+  var clockInterval;
+  var format = localStorage.getItem("format") || "human";
   var updateFormatSetting = function() {
+    var frequency;
     localStorage.setItem("format", format);
     document.getElementById("settings-format").innerHTML = format;
     switch (format) {
@@ -59,19 +88,24 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
       document.documentElement.classList.add("format-human");
       document.documentElement.classList.remove("format-machine");
       document.documentElement.classList.remove("format-legacy");
+      frequency = 86.4;
       break;
     case "machine":
       document.documentElement.classList.add("format-machine");
       document.documentElement.classList.remove("format-human");
       document.documentElement.classList.remove("format-legacy");
+      frequency = 10;
       break;
     case "legacy":
       document.documentElement.classList.add("format-legacy");
       document.documentElement.classList.remove("format-human");
       document.documentElement.classList.remove("format-machine");
+      frequency = 100;
       break;
     }
-    sync();
+    renderEphemeris();
+    clearInterval(clockInterval);
+    clockInterval = window.setInterval(renderClock, frequency);
   };
 
   var menu = false;
@@ -85,6 +119,28 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
   });
 
   document.getElementById("alert").innerHTML = "accessing geolocation";
+
+  var renderEphemeris = function() {
+    if (sunrise && sunset && longitude) {
+      switch (format) {
+      case "human":
+        var sunriseTime = geodate(sunrise, longitude);
+        var sunsetTime = geodate(sunset, longitude);
+        document.getElementById("sunrise-time").innerHTML = sunriseTime.slice(12, 17);
+        document.getElementById("sunset-time").innerHTML = sunsetTime.slice(12, 17);
+        break;
+      case "machine":
+        document.getElementById("sunrise-time").innerHTML = sunrise;
+        document.getElementById("sunset-time").innerHTML = sunset;
+        break;
+      case "legacy":
+        document.getElementById("sunrise-time").innerHTML = unixToTime(sunrise);
+        document.getElementById("sunset-time").innerHTML = unixToTime(sunset);
+        break;
+      }
+    }
+  };
+
   var sync = function(callback) {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -99,23 +155,7 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
           var timestamp = Date.now() / 1000;
           sunrise = getSunrise(timestamp, longitude, latitude);
           sunset = getSunset(timestamp, longitude, latitude);
-
-          switch (format) {
-          case "human":
-            var sunriseTime = geodate(sunrise, longitude);
-            var sunsetTime = geodate(sunset, longitude);
-            document.getElementById("sunrise-time").innerHTML = sunriseTime.slice(12, 17);
-            document.getElementById("sunset-time").innerHTML = sunsetTime.slice(12, 17);
-            break;
-          case "machine":
-            document.getElementById("sunrise-time").innerHTML = sunrise;
-            document.getElementById("sunset-time").innerHTML = sunset;
-            break;
-          case "legacy":
-            document.getElementById("sunrise-time").innerHTML = unixToTime(sunrise);
-            document.getElementById("sunset-time").innerHTML = unixToTime(sunset);
-            break;
-          }
+          renderEphemeris();
         }
 
         if (callback) {
@@ -213,44 +253,53 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     }
   };
 
+  var renderGeodate = function(timestamp) {
+    if (longitude) {
+      var parts = geodate(timestamp, longitude).split(":");
+      if (epoch === "unix") {
+        parts[0] = "00";
+        parts[1] = leftpad((parseInt(parts[1], 10) + 2000 - 1970) % 100, 2);
+      }
+
+      // Render clock
+      document.getElementById("century").innerHTML   = parts[0];
+      document.getElementById("year").innerHTML      = parts[1];
+      document.getElementById("month").innerHTML     = parts[2];
+      document.getElementById("day").innerHTML       = parts[3];
+      document.getElementById("centiday").innerHTML  = parts[4];
+      document.getElementById("dimiday").innerHTML   = parts[5];
+    }
+  };
+
   var renderClock = function() {
-    if (latitude && longitude) {
-      var timestamp = Date.now() / 1000;
+    var timestamp = Date.now() / 1000;
 
-      if (microday >= 100) {
-        microday = 0;
-        setTimeout(function() {
-          var parts = geodate(timestamp, longitude).split(":");
-
-          // Render clock
-          document.getElementById("century").innerHTML   = parts[0];
-          document.getElementById("year").innerHTML      = parts[1];
-          document.getElementById("month").innerHTML     = parts[2];
-          document.getElementById("day").innerHTML       = parts[3];
-          document.getElementById("centiday").innerHTML  = parts[4];
-          document.getElementById("dimiday").innerHTML   = parts[5];
-        }, 0);
-      }
-
-      switch (format) {
-      case "human":
+    switch (format) {
+    case "human":
+      if (longitude) {
         document.getElementById("microday").innerHTML = leftpad(microday % 100, 2);
+        if (microday >= 100) {
+          microday = 0;
+          setTimeout(function() {
+            renderGeodate(timestamp);
+          }, 0);
+        }
         microday++;
-        break;
-      case "machine":
-        document.getElementById("timestamp").innerHTML = timestamp.toFixed(0);
-        microday = 0;
-        break;
-      case "legacy":
-        document.getElementById("legacy-date").innerHTML = unixToDate(timestamp);
-        document.getElementById("legacy-time").innerHTML = unixToTime(timestamp);
-        microday = 0;
-        break;
       }
+      break;
+    case "machine":
+      var precision = clock === "full" ? 2 : 0;
+      document.getElementById("timestamp").innerHTML = timestamp.toFixed(precision);
+      break;
+    case "legacy":
+      document.getElementById("legacy-date").innerHTML = unixToDate(timestamp);
+      document.getElementById("legacy-time").innerHTML = unixToTime(timestamp);
+      break;
     }
   };
 
   // Update display
+
   updateClockSetting();
   document.getElementById("settings-clock").addEventListener("click", function() {
     switch (clock) {
@@ -259,20 +308,46 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
     }
     updateClockSetting();
   });
+
+  updateEpochSetting();
+  document.getElementById("settings-epoch").addEventListener("click", function() {
+    if (format === "human") {
+      switch (epoch) {
+        case "gregorian":
+          epoch = "unix";
+          break;
+        case "unix":
+          epoch = "gregorian";
+          break;
+      }
+      updateEpochSetting();
+    }
+  });
+
   updateFormatSetting();
   document.getElementById("settings-format").addEventListener("click", function() {
     switch (format) {
-      case "human":   format = "machine"; break;
-      case "machine": format = "legacy";  break;
-      case "legacy":  format = "human";   break;
+      case "human":
+        format = "machine";
+        epoch = "unix";
+        break;
+      case "machine":
+        format = "legacy";
+        epoch = "gregorian";
+        break;
+      case "legacy":
+        format = "human";
+        epoch = "gregorian";
+        break;
     }
     updateFormatSetting();
+    updateEpochSetting();
   });
+
   sync(function() {
     renderSky();
     renderClock();
   });
-  window.setInterval(renderClock, 86.4);
   window.setInterval(renderSky, 2000);
   window.setInterval(sync, 5 * 60 * 1000); // 5 minutes
 
