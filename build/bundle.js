@@ -13213,11 +13213,15 @@ wasm.initialize({ noExitRuntime: true }).then(function(module) {
       break;
     case "machine":
       var precision = clock === "full" ? 2 : 0;
-      document.getElementById("timestamp").innerHTML = timestamp.toFixed(precision);
+      document.getElementById("timestamp").innerHTML = timestamp.
+        toFixed(precision).
+        replace('.', '<span class="sep">.</span>');
       break;
     case "legacy":
-      document.getElementById("legacy-date").innerHTML = unixToDate(timestamp);
-      document.getElementById("legacy-time").innerHTML = unixToTime(timestamp);
+      document.getElementById("legacy-date").innerHTML = unixToDate(timestamp).
+        replace(/[-]/g, '<span class="sep">-</span>');
+      document.getElementById("legacy-time").innerHTML = unixToTime(timestamp).
+        replace(/[:]/g, '<span class="sep">:</span>');
       break;
     }
   };

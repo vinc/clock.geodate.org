@@ -63,6 +63,9 @@ body, code {
 #time code {
   color: rgba(255, 255, 255, 0.9);
 }
+#time .sep {
+  color: rgba(255, 255, 255, 0.6);
+}
 
 #alert {
   font-size: calc(16px + 2vw);
@@ -90,7 +93,7 @@ html.clock-compact .extra {
 }
 #time code:hover:after {
   font-size: calc(16px + 2vw);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
   position: absolute;
   display: block;
   text-align: center;
